@@ -4,11 +4,15 @@ import { motion } from 'framer-motion';
 import { 
   FiSearch, FiDatabase, FiGlobe, FiFileText, 
   FiClock, FiMonitor, FiMapPin, FiShield,
-  FiRefreshCw
+  FiRefreshCw, FiPlay, FiChevronDown
 } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from 'react';
-import { fetchRecentScans, fetchDataSources, fetchSystemActivity, fetchThreatData } from '../lib/api';
+import { fetchRecentScans, fetchDataSources, fetchSystemActivity, fetchThreatData, performScan } from '../lib/api';
+import { scanTypes } from '../lib/scanTypes';
+import { ScanConfigModal } from './ScanConfigModal';
+import { ScanProgress } from './ScanProgress';
+import type { ScanProgress as ScanProgressType } from '../lib/api';
 
 const menuItems = [
   { icon: FiSearch, label: 'OSINT Search' },
@@ -25,6 +29,11 @@ export function Layout() {
   const [sourcesCount, setSourcesCount] = useState(0);
   const [systemActivity, setSystemActivity] = useState([]);
   const [threatData, setThreatData] = useState([]);
+  const [showScanTypes, setShowScanTypes] = useState(false);
+  const [selectedScan, setSelectedScan] = useState(scanTypes[0]);
+  const [isScanning, setIsScanning] = useState(false);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [scanProgress, setScanProgress] = useState<ScanProgressType | null>(null);
 
   const fetchData = async () => {
     try {
@@ -41,6 +50,27 @@ export function Layout() {
       setThreatData(threats);
     } catch (error) {
       console.error('Error fetching data:', error);
+    }
+  };
+
+  const handleScanTypeSelect = (scanType: typeof scanTypes[0]) => {
+    setSelectedScan(scanType);
+    setShowScanTypes(false);
+    setShowConfigModal(true);
+  };
+
+  const handleStartScan = async (config: Record<string, any>) => {
+    setIsScanning(true);
+    try {
+      await performScan(selectedScan.id, config, (progress) => {
+        setScanProgress(progress);
+      });
+    } catch (error) {
+      console.error('Scan error:', error);
+    } finally {
+      setIsScanning(false);
+      setScanProgress(null);
+      fetchData();
     }
   };
 
@@ -94,15 +124,43 @@ export function Layout() {
             </h1>
             <p className="text-gray-500">Real-time OSINT monitoring</p>
           </div>
-          <button 
-            className="new-scan-button group"
-            onClick={fetchData}
-          >
-            <span className="flex items-center gap-2">
-              <FiRefreshCw className="group-hover:rotate-180 transition-transform duration-500" />
-              Refresh Data
-            </span>
-          </button>
+          <div className="flex gap-3">
+            <div className="relative">
+              <button 
+                className="scan-button group"
+                onClick={() => setShowScanTypes(!showScanTypes)}
+              >
+                <span className="flex items-center gap-2">
+                  <FiPlay className={`transition-transform duration-500 ${isScanning ? 'animate-pulse text-[#ff0000]' : ''}`} />
+                  {selectedScan.label}
+                  <FiChevronDown className={`transition-transform duration-300 ${showScanTypes ? 'rotate-180' : ''}`} />
+                </span>
+              </button>
+              {showScanTypes && (
+                <div className="absolute right-0 mt-2 w-64 bg-black/90 backdrop-blur-md border border-white/10 rounded-lg shadow-xl z-50">
+                  {scanTypes.map((type) => (
+                    <button
+                      key={type.id}
+                      className="w-full px-4 py-3 text-left hover:bg-white/5 transition-colors first:rounded-t-lg last:rounded-b-lg flex flex-col"
+                      onClick={() => handleScanTypeSelect(type)}
+                    >
+                      <span className="text-white font-medium">{type.label}</span>
+                      <span className="text-sm text-gray-500">{type.description}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button 
+              className="new-scan-button group"
+              onClick={fetchData}
+            >
+              <span className="flex items-center gap-2">
+                <FiRefreshCw className="group-hover:rotate-180 transition-transform duration-500" />
+                Refresh Data
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -168,6 +226,12 @@ export function Layout() {
             </div>
             <div className="text-3xl font-semibold mb-2">Online</div>
             <div className="text-sm">
+              <span className="text-[#00e5ff]">100%</span>
+              <span className="text-gray-500 ml-1">up Continuing the Layout.tsx file content exactly where it left off:
+  )
+}
+
+```
               <span className="text-[#00e5ff]">100%</span>
               <span className="text-gray-500 ml-1">uptime</span>
             </div>
@@ -249,6 +313,17 @@ export function Layout() {
           </motion.div>
         </div>
       </div>
+
+      {/* Scan Configuration Modal */}
+      <ScanConfigModal
+        isOpen={showConfigModal}
+        onClose={() => setShowConfigModal(false)}
+        scanConfig={selectedScan}
+        onStartScan={handleStartScan}
+      />
+
+      {/* Scan Progress Indicator */}
+      {scanProgress && <ScanProgress progress={scanProgress} />}
     </div>
   );
 }
