@@ -17,25 +17,34 @@
 
 @layer components {
   .sidebar-item {
-    @apply flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all;
+    @apply flex items-center gap-3 px-4 py-3 text-gray-400 w-full 
+           hover:bg-black/20 rounded-lg transition-all duration-300
+           border border-transparent hover:border-white/5;
   }
 
   .stat-card {
-    @apply bg-[#141414] border border-white/10 rounded-lg p-4;
+    @apply bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6
+           hover:border-white/20 transition-all duration-300
+           shadow-lg shadow-black/20;
   }
 
   .chart-container {
-    @apply bg-[#141414] border border-white/10 rounded-lg p-4 mt-6;
+    @apply bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-6 mt-6
+           hover:border-white/20 transition-all duration-300
+           shadow-lg shadow-black/20;
   }
 
   .search-input {
-    @apply w-full bg-[#ff0000]/10 border border-[#ff0000]/20 rounded-lg px-4 py-2 text-white
-           placeholder:text-gray-500 focus:outline-none focus:border-[#ff0000]/40;
+    @apply w-full bg-black/40 backdrop-blur-md border border-[#ff0000]/20 rounded-lg px-4 py-2 text-white
+           placeholder:text-gray-500 focus:outline-none focus:border-[#ff0000]/40
+           transition-all duration-300;
   }
 
   .new-scan-button {
-    @apply bg-[#ff0000] text-white px-6 py-2 rounded-lg hover:bg-[#ff0000]/90 
-           transition-all font-medium shadow-lg shadow-[#ff0000]/20;
+    @apply bg-[#ff0000] text-white px-6 py-2 rounded-lg 
+           hover:bg-[#ff0000]/90 transition-all duration-300
+           font-medium shadow-lg shadow-[#ff0000]/20
+           border border-[#ff0000]/50 hover:border-[#ff0000];
   }
 }
 
@@ -54,4 +63,23 @@
 
 .threat-detection path {
   stroke: var(--primary-cyan);
+}
+
+/* Glassmorphism effects */
+.glass-effect {
+  @apply bg-black/40 backdrop-blur-md border border-white/10;
+}
+
+/* Animations */
+@keyframes glow {
+  0%, 100% { 
+    text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 15px #ff0000;
+  }
+  50% { 
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
+  }
+}
+
+.glow-text {
+  animation: glow 2s ease-in-out infinite;
 }
