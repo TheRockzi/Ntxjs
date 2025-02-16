@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { 
   FiSearch, FiDatabase, FiGlobe, FiFileText, 
   FiClock, FiMonitor, FiMapPin, FiShield,
-  FiRefreshCw, FiPlay, FiChevronDown
+  FiRefreshCw, FiPlay, FiChevronDown,
+  FiSettings, FiLogOut
 } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from 'react';
@@ -14,6 +15,10 @@ import { ScanConfigModal } from './ScanConfigModal';
 import { ScanProgress } from './ScanProgress';
 import { ScanTerminal } from './ScanTerminal';
 import type { ScanProgress as ScanProgressType } from '../lib/api';
+
+interface LayoutProps {
+  onLogout: () => void;
+}
 
 const menuItems = [
   { icon: FiSearch, label: 'OSINT Search' },
@@ -25,7 +30,7 @@ const menuItems = [
   { icon: FiMapPin, label: 'Geolocation' },
 ];
 
-export function Layout() {
+export function Layout({ onLogout }: LayoutProps) {
   const [scansCount, setScansCount] = useState(0);
   const [sourcesCount, setSourcesCount] = useState(0);
   const [systemActivity, setSystemActivity] = useState([]);
@@ -96,7 +101,7 @@ export function Layout() {
       <motion.aside 
         initial={{ x: -280 }}
         animate={{ x: 0 }}
-        className="w-[280px] bg-black/40 backdrop-blur-md border-r border-white/10 p-4"
+        className="w-[280px] bg-black/40 backdrop-blur-md border-r border-white/10 p-4 flex flex-col"
       >
         <div className="flex items-center gap-2 mb-8">
           <FiShield className="text-[#ff0000] text-2xl animate-pulse" />
@@ -115,7 +120,7 @@ export function Layout() {
           <FiSearch className="absolute right-3 top-3 text-[#ff0000]/50" />
         </div>
 
-        <nav className="space-y-1">
+        <nav className="space-y-1 flex-1">
           {menuItems.map(({ icon: Icon, label }) => (
             <button key={label} className="sidebar-item group">
               <Icon className="text-xl group-hover:text-[#ff0000] transition-colors" />
@@ -123,6 +128,21 @@ export function Layout() {
             </button>
           ))}
         </nav>
+
+        {/* Settings and Logout Buttons */}
+        <div className="pt-4 border-t border-white/10 space-y-1">
+          <button className="sidebar-item group">
+            <FiSettings className="text-xl group-hover:text-[#ff0000] transition-colors" />
+            <span className="group-hover:text-[#ff0000] transition-colors">Settings</span>
+          </button>
+          <button 
+            onClick={onLogout}
+            className="sidebar-item group"
+          >
+            <FiLogOut className="text-xl group-hover:text-[#ff0000] transition-colors" />
+            <span className="group-hover:text-[#ff0000] transition-colors">Logout</span>
+          </button>
+        </div>
       </motion.aside>
 
       {/* Main Content */}

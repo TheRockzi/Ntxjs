@@ -14,12 +14,16 @@ export default function Home() {
     }
   };
 
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
   return (
     <AnimatePresence mode="wait">
       {!isAuthenticated ? (
         <LoginForm onLogin={handleLogin} key="login" />
       ) : (
-        <Layout key="dashboard" />
+        <Layout onLogout={handleLogout} key="dashboard" />
       )}
     </AnimatePresence>
   );
