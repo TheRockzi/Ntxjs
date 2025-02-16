@@ -106,7 +106,7 @@ export function Layout({ onLogout }: LayoutProps) {
         <div className="flex items-center gap-2 mb-8">
           <FiShield className="text-[#ff0000] text-2xl animate-pulse" />
           <div>
-            <h1 className="text-xl font-semibold text-white">KaliumOSINT</h1>
+            <h1 className="text-xl font-semibold text-white title-glitch">KaliumOSINT</h1>
             <span className="text-xs text-gray-500">v1.0.0</span>
           </div>
         </div>

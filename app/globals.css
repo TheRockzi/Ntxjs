@@ -7,12 +7,27 @@
   --primary-cyan: #00e5ff;
   --background: #0a0a0a;
   --card-bg: #141414;
+  --cyber-purple: #bc13fe;
+  --hacker-red: #ff003c;
 }
 
 @layer base {
   body {
     @apply bg-[#0a0a0a] text-white font-sans;
   }
+}
+
+@keyframes glitch {
+  0% { text-shadow: 2px 0 0 var(--hacker-red), -2px 0 0 var(--cyber-purple); }
+  2% { text-shadow: 3px 0.5rem 0 var(--hacker-red), -3px -0.5rem 0 var(--cyber-purple); }
+  4% { text-shadow: none; }
+  96% { text-shadow: none; }
+  98% { text-shadow: -3px 0 0 var(--hacker-red), 3px 0 0 var(--cyber-purple); }
+}
+
+.title-glitch {
+  animation: glitch 4s infinite;
+  text-shadow: 2px 0 0 var(--hacker-red), -2px 0 0 var(--cyber-purple);
 }
 
 @layer components {
