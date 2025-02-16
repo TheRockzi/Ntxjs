@@ -9,6 +9,7 @@ const USE_MOCK_DATA = !SHODAN_API_KEY || !URLSCAN_API_KEY;
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const endpoint = searchParams.get('endpoint');
+  const target = searchParams.get('target');
 
   if (!endpoint) {
     return NextResponse.json({ error: 'No endpoint specified' }, { status: 400 });
@@ -22,9 +23,41 @@ export async function GET(request: Request) {
       case 'sources':
         return NextResponse.json(Array.from({ length: Math.floor(Math.random() * 20) + 5 }));
       case 'activity':
-        return NextResponse.json({ matches: mockSystemActivity });
+        const mockActivity = {
+          matches: mockSystemActivity.map(item => ({
+            ...item,
+            port: Math.floor(Math.random() * 1000) + 1,
+            product: ['Apache', 'Nginx', 'IIS'][Math.floor(Math.random() * 3)],
+            version: `${Math.floor(Math.random() * 5)}.${Math.floor(Math.random() * 10)}`,
+            vulns: Math.random() > 0.7 ? {
+              'CVE-2023-1234': {
+                summary: 'Remote Code Execution Vulnerability',
+                cvss: (Math.random() * 10).toFixed(1)
+              }
+            } : undefined
+          }))
+        };
+        return NextResponse.json(mockActivity);
       case 'threats':
-        return NextResponse.json({ results: mockThreatData });
+        const mockThreats = {
+          results: mockThreatData.map(item => ({
+            ...item,
+            page: {
+              domain: target || 'example.com'
+            },
+            stats: {
+              malicious: Math.floor(Math.random() * 5),
+              suspicious: Math.floor(Math.random() * 10)
+            },
+            verdicts: {
+              overall: {
+                score: Math.floor(Math.random() * 100),
+                malicious: Math.random() > 0.7
+              }
+            }
+          }))
+        };
+        return NextResponse.json(mockThreats);
       default:
         return NextResponse.json({ error: 'Invalid endpoint' }, { status: 400 });
     }
@@ -42,10 +75,12 @@ export async function GET(request: Request) {
         url = `https://api.shodan.io/shodan/ports?key=${SHODAN_API_KEY}`;
         break;
       case 'activity':
-        url = `https://api.shodan.io/shodan/host/search?key=${SHODAN_API_KEY}&query=port:80&facets=port`;
+        const query = target ? `hostname:${target}` : 'port:80';
+        url = `https://api.shodan.io/shodan/host/search?key=${SHODAN_API_KEY}&query=${query}`;
         break;
       case 'threats':
-        url = 'https://urlscan.io/api/v1/search/?q=domain:*.com&size=12';
+        const urlscanQuery = target ? `domain:${target}` : 'domain:*.com';
+        url = `https://urlscan.io/api/v1/search/?q=${urlscanQuery}&size=12`;
         headers = {
           'API-Key': URLSCAN_API_KEY
         };

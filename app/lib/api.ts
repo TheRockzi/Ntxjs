@@ -32,7 +32,6 @@ export const performScan = async (
   onProgress: (progress: ScanProgress) => void
 ): Promise<void> => {
   try {
-    // Simulate different scan durations based on scan type and configuration
     const totalSteps = getScanSteps(scanType, config);
     let currentStep = 0;
 
@@ -43,41 +42,96 @@ export const performScan = async (
     };
 
     // Initial setup
-    updateProgress('Initializing scan...');
+    updateProgress('Initializing scan...', 'Setting up scan environment');
     await delay(1000);
 
-    // Configuration validation
-    updateProgress('Validating configuration...');
+    // Target validation
+    updateProgress('Validating target...', `Target: ${config.target}`);
     await delay(800);
 
-    // Target resolution
-    updateProgress('Resolving target...');
-    await delay(1200);
+    // Fetch Shodan data
+    updateProgress('Querying Shodan...', 'Retrieving host information');
+    try {
+      const shodanResponse = await axios.get('/api/proxy', {
+        params: {
+          endpoint: 'activity',
+          target: config.target
+        }
+      });
 
-    // Main scan process
-    switch (scanType) {
-      case 'quick':
-        await simulateQuickScan(config, updateProgress);
-        break;
-      case 'full':
-        await simulateFullScan(config, updateProgress);
-        break;
-      case 'ports':
-        await simulatePortScan(config, updateProgress);
-        break;
-      case 'web':
-        await simulateWebScan(config, updateProgress);
-        break;
-      case 'malware':
-        await simulateMalwareScan(config, updateProgress);
-        break;
+      if (shodanResponse.data.matches) {
+        const ports = shodanResponse.data.matches
+          .map((match: any) => match.port)
+          .filter((port: number, index: number, self: number[]) => self.indexOf(port) === index);
+
+        updateProgress('Analyzing ports...', `Open ports detected: ${ports.join(', ')}`);
+
+        shodanResponse.data.matches.forEach((match: any) => {
+          if (match.product) {
+            updateProgress(
+              'Service detection',
+              `Port ${match.port}: ${match.product}${match.version ? ` (v${match.version})` : ''}`
+            );
+          }
+          if (match.vulns) {
+            Object.entries(match.vulns).forEach(([vuln, details]: [string, any]) => {
+              updateProgress(
+                'Vulnerability detected',
+                `${vuln}: ${details.summary} (CVSS: ${details.cvss})`
+              );
+            });
+          }
+        });
+      }
+    } catch (error) {
+      updateProgress('Shodan scan error', 'Failed to retrieve Shodan data');
     }
 
-    // Finalizing
-    updateProgress('Generating report...');
+    // Fetch URLScan data
+    updateProgress('Querying URLScan...', 'Analyzing web presence');
+    try {
+      const urlscanResponse = await axios.get('/api/proxy', {
+        params: {
+          endpoint: 'threats',
+          target: config.target
+        }
+      });
+
+      if (urlscanResponse.data.results) {
+        urlscanResponse.data.results.forEach((result: any) => {
+          if (result.page) {
+            updateProgress(
+              'Web analysis',
+              `Domain: ${result.page.domain}`
+            );
+          }
+          if (result.stats) {
+            updateProgress(
+              'Security statistics',
+              `Malicious indicators: ${result.stats.malicious || 0}, Suspicious: ${result.stats.suspicious || 0}`
+            );
+          }
+          if (result.verdicts) {
+            updateProgress(
+              'Security verdict',
+              `Overall score: ${result.verdicts.overall.score}, Malicious: ${result.verdicts.overall.malicious}`
+            );
+          }
+        });
+      }
+    } catch (error) {
+      updateProgress('URLScan error', 'Failed to retrieve URLScan data');
+    }
+
+    // Risk assessment
+    updateProgress('Performing risk assessment...', 'Analyzing collected data');
     await delay(1000);
 
-    updateProgress('Scan completed', 'Check the results in the dashboard');
+    // Final report
+    updateProgress('Generating final report...', 'Compiling findings');
+    await delay(1000);
+
+    updateProgress('Scan completed', 'All analysis tasks finished. Review the findings above.');
   } catch (error) {
     logError('Scan error:', error);
     throw error;
@@ -89,89 +143,17 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const getScanSteps = (scanType: string, config: Record<string, any>): number => {
   switch (scanType) {
     case 'quick':
-      return 5;
+      return 8;
     case 'full':
-      return 10;
+      return 15;
     case 'ports':
-      return config.portRange === 'full' ? 15 : 8;
+      return config.portRange === 'full' ? 20 : 12;
     case 'web':
-      return config.scanTypes === 'all' ? 12 : 6;
+      return config.scanTypes === 'all' ? 18 : 10;
     case 'malware':
-      return config.engineType === 'deep' ? 10 : 5;
+      return config.engineType === 'deep' ? 15 : 8;
     default:
-      return 5;
-  }
-};
-
-const simulateQuickScan = async (
-  config: Record<string, any>,
-  updateProgress: (status: string, details?: string) => void
-) => {
-  updateProgress('Performing quick vulnerability check...');
-  await delay(1500);
-  updateProgress('Analyzing surface vulnerabilities...', 'Found 2 potential issues');
-  await delay(1000);
-};
-
-const simulateFullScan = async (
-  config: Record<string, any>,
-  updateProgress: (status: string, details?: string) => void
-) => {
-  updateProgress('Initiating deep scan...');
-  await delay(1000);
-  updateProgress('Checking system vulnerabilities...', 'Scanning ports 1-1024');
-  await delay(1500);
-  updateProgress('Analyzing security configurations...', 'Reviewing settings');
-  await delay(1500);
-  updateProgress('Running exploit detection...', 'Testing known vulnerabilities');
-  await delay(1500);
-};
-
-const simulatePortScan = async (
-  config: Record<string, any>,
-  updateProgress: (status: string, details?: string) => void
-) => {
-  const portRanges = {
-    common: '1-1024',
-    extended: '1-10000',
-    full: '1-65535'
-  };
-  const range = portRanges[config.portRange as keyof typeof portRanges];
-  
-  updateProgress('Starting port scan...', `Range: ${range}`);
-  await delay(1000);
-  updateProgress('Scanning TCP ports...', 'Found 3 open ports');
-  await delay(1500);
-  
-  if (config.scanType !== 'tcp') {
-    updateProgress('Scanning UDP ports...', 'Found 1 open port');
-    await delay(1500);
-  }
-};
-
-const simulateWebScan = async (
-  config: Record<string, any>,
-  updateProgress: (status: string, details?: string) => void
-) => {
-  updateProgress('Crawling website...', `Depth: ${config.crawlDepth}`);
-  await delay(1500);
-  updateProgress('Checking for vulnerabilities...', 'Testing injection points');
-  await delay(1500);
-  updateProgress('Analyzing responses...', 'Processing security headers');
-  await delay(1500);
-};
-
-const simulateMalwareScan = async (
-  config: Record<string, any>,
-  updateProgress: (status: string, details?: string) => void
-) => {
-  updateProgress('Initializing malware scan...', `Engine: ${config.engineType}`);
-  await delay(1000);
-  updateProgress('Scanning for known signatures...', 'Checked 1000 patterns');
-  await delay(1500);
-  if (config.engineType === 'deep') {
-    updateProgress('Performing behavioral analysis...', 'Analyzing patterns');
-    await delay(1500);
+      return 8;
   }
 };
 

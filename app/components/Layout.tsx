@@ -12,6 +12,7 @@ import { fetchRecentScans, fetchDataSources, fetchSystemActivity, fetchThreatDat
 import { scanTypes } from '../lib/scanTypes';
 import { ScanConfigModal } from './ScanConfigModal';
 import { ScanProgress } from './ScanProgress';
+import { ScanTerminal } from './ScanTerminal';
 import type { ScanProgress as ScanProgressType } from '../lib/api';
 
 const menuItems = [
@@ -34,6 +35,7 @@ export function Layout() {
   const [isScanning, setIsScanning] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [scanProgress, setScanProgress] = useState<ScanProgressType | null>(null);
+  const [scanLogs, setScanLogs] = useState<string[]>([]);
 
   const fetchData = async () => {
     try {
@@ -61,12 +63,20 @@ export function Layout() {
 
   const handleStartScan = async (config: Record<string, any>) => {
     setIsScanning(true);
+    setScanLogs(prev => [...prev, `Starting ${selectedScan.label.toLowerCase()} scan...`]);
+    setScanLogs(prev => [...prev, `Configuration: ${JSON.stringify(config, null, 2)}`]);
+    
     try {
       await performScan(selectedScan.id, config, (progress) => {
         setScanProgress(progress);
+        if (progress.details) {
+          setScanLogs(prev => [...prev, progress.details]);
+        }
       });
+      setScanLogs(prev => [...prev, 'Scan completed successfully']);
     } catch (error) {
       console.error('Scan error:', error);
+      setScanLogs(prev => [...prev, `Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`]);
     } finally {
       setIsScanning(false);
       setScanProgress(null);
@@ -227,12 +237,6 @@ export function Layout() {
             <div className="text-3xl font-semibold mb-2">Online</div>
             <div className="text-sm">
               <span className="text-[#00e5ff]">100%</span>
-              <span className="text-gray-500 ml-1">up Continuing the Layout.tsx file content exactly where it left off:
-  )
-}
-
-```
-              <span className="text-[#00e5ff]">100%</span>
               <span className="text-gray-500 ml-1">uptime</span>
             </div>
           </motion.div>
@@ -311,6 +315,9 @@ export function Layout() {
               </LineChart>
             </ResponsiveContainer>
           </motion.div>
+
+          {/* Scan Terminal */}
+          <ScanTerminal logs={scanLogs} />
         </div>
       </div>
 
