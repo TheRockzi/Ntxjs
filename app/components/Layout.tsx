@@ -5,7 +5,7 @@ import {
   FiSearch, FiDatabase, FiGlobe, FiFileText, 
   FiClock, FiMonitor, FiMapPin, FiShield,
   FiRefreshCw, FiPlay, FiChevronDown,
-  FiSettings, FiLogOut, FiAlertCircle
+  FiSettings, FiLogOut
 } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from 'react';
@@ -30,28 +30,6 @@ const menuItems = [
   { icon: FiMapPin, label: 'Geolocation' },
 ];
 
-// Función para validar dominio o IP
-const isValidTarget = (target: string): boolean => {
-  // Validar formato de dominio (incluyendo http://, https://, www.)
-  const domainRegex = /^(https?:\/\/|www\.)[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+/;
-  
-  // Validar formato de dirección IP
-  const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-  
-  return domainRegex.test(target) || ipRegex.test(target);
-};
-
-// Función para normalizar el objetivo
-const normalizeTarget = (target: string): string => {
-  if (!target.startsWith('http://') && !target.startsWith('https://') && !target.startsWith('www.')) {
-    return `https://${target}`;
-  }
-  if (target.startsWith('www.')) {
-    return `https://${target}`;
-  }
-  return target;
-};
-
 export function Layout({ onLogout }: LayoutProps) {
   const [scansCount, setScansCount] = useState(0);
   const [sourcesCount, setSourcesCount] = useState(0);
@@ -63,9 +41,6 @@ export function Layout({ onLogout }: LayoutProps) {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [scanProgress, setScanProgress] = useState<ScanProgressType | null>(null);
   const [scanLogs, setScanLogs] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState('');
 
   const fetchData = async () => {
     try {
@@ -82,45 +57,6 @@ export function Layout({ onLogout }: LayoutProps) {
       setThreatData(threats);
     } catch (error) {
       console.error('Error fetching data:', error);
-    }
-  };
-
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchError('');
-    
-    const query = searchQuery.trim();
-    if (!query) return;
-
-    if (!isValidTarget(query)) {
-      setSearchError('Por favor, ingresa un dominio válido (http://, https://, www.) o una dirección IP');
-      return;
-    }
-
-    setIsSearching(true);
-    const normalizedTarget = normalizeTarget(query);
-    setScanLogs(prev => [...prev, `Iniciando búsqueda OSINT para: ${normalizedTarget}`]);
-
-    try {
-      const searchConfig = {
-        target: normalizedTarget,
-        intensity: 'medium'
-      };
-
-      await performScan('quick', searchConfig, (progress) => {
-        setScanProgress(progress);
-        if (progress.details) {
-          setScanLogs(prev => [...prev, progress.details]);
-        }
-      });
-
-      setScanLogs(prev => [...prev, 'Búsqueda completada']);
-      await fetchData();
-    } catch (error) {
-      setScanLogs(prev => [...prev, `Error en la búsqueda: ${error instanceof Error ? error.message : 'Error desconocido'}`]);
-    } finally {
-      setIsSearching(false);
-      setScanProgress(null);
     }
   };
 
@@ -175,36 +111,16 @@ export function Layout({ onLogout }: LayoutProps) {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <form onSubmit={handleSearch} className="relative">
-            <input
-              type="text"
-              placeholder="Ingresa dominio o IP"
-              className={`search-input ${searchError ? 'border-red-500' : ''}`}
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setSearchError('');
-              }}
-              disabled={isSearching}
-            />
-            <button
-              type="submit"
-              disabled={isSearching}
-              className="absolute right-3 top-3 text-[#ff0000]/50 hover:text-[#ff0000] transition-colors disabled:opacity-50"
-            >
-              <FiSearch className={isSearching ? 'animate-spin' : ''} />
-            </button>
-          </form>
-          {searchError && (
-            <div className="text-red-500 text-sm flex items-center gap-1">
-              <FiAlertCircle className="flex-shrink-0" />
-              <span>{searchError}</span>
-            </div>
-          )}
+        <div className="mb-6 relative">
+          <input
+            type="text"
+            placeholder="OSINT Search"
+            className="search-input"
+          />
+          <FiSearch className="absolute right-3 top-3 text-[#ff0000]/50" />
         </div>
 
-        <nav className="space-y-1 flex-1 mt-6">
+        <nav className="space-y-1 flex-1">
           {menuItems.map(({ icon: Icon, label }) => (
             <button key={label} className="sidebar-item group">
               <Icon className="text-xl group-hover:text-[#ff0000] transition-colors" />
