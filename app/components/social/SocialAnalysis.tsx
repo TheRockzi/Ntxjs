@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiImage, FiShare2, FiInfo, FiArrowLeft } from 'react-icons/fi';
+import { FiSearch, FiImage, FiShare2, FiInfo, FiArrowLeft, FiBarChart2 } from 'react-icons/fi';
 import { UsernameSearch } from './UsernameSearch';
 import { ImageAnalysis } from './ImageAnalysis';
 import { DataCorrelation } from './DataCorrelation';
 import { LegalDisclaimer } from './LegalDisclaimer';
+import { AnalyticsGrid } from './AnalyticsGrid';
 
 type AnalysisTab = 'username' | 'image' | 'correlation' | 'legal' | null;
 
@@ -39,6 +40,20 @@ const analysisOptions = [
   }
 ];
 
+// Mock analytics data
+const mockAnalytics = {
+  profiles: 847,
+  activity: 92,
+  reach: 156432,
+  risks: 12,
+  trends: {
+    profiles: 15,
+    activity: 8,
+    reach: 23,
+    risks: -5
+  }
+};
+
 export function SocialAnalysis() {
   const [activeTab, setActiveTab] = useState<AnalysisTab>(null);
 
@@ -63,6 +78,15 @@ export function SocialAnalysis() {
               <p className="text-gray-400">Select an analysis tool to begin your investigation</p>
             </div>
 
+            {/* Analytics Overview */}
+            <div className="mb-12">
+              <div className="flex items-center gap-2 mb-6">
+                <FiBarChart2 className="text-[#00e5ff] text-xl" />
+                <h2 className="text-xl font-semibold text-white">Analytics Overview</h2>
+              </div>
+              <AnalyticsGrid data={mockAnalytics} />
+            </div>
+
             <motion.div 
               className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto"
               variants={{
@@ -75,7 +99,7 @@ export function SocialAnalysis() {
               initial="hidden"
               animate="show"
             >
-              {analysisOptions.map((option, index) => (
+              {analysisOptions.map((option) => (
                 <motion.div
                   key={option.id}
                   variants={{
