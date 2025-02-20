@@ -15,6 +15,7 @@ import { ScanConfigModal } from './ScanConfigModal';
 import { ScanProgress } from './ScanProgress';
 import { ScanTerminal } from './ScanTerminal';
 import { SocialAnalysis } from './social/SocialAnalysis';
+import { GeolocationSection } from './GeolocationSection';
 import type { ScanProgress as ScanProgressType } from '../lib/api';
 
 interface LayoutProps {
@@ -26,9 +27,9 @@ const menuItems = [
   { id: 'osint', icon: FiSearch, label: 'OSINT Search' },
   { id: 'social', icon: FiGlobe, label: 'Social Analysis' },
   { id: 'metadata', icon: FiFileText, label: 'Metadata Analysis' },
-  { id: 'history', icon: FiClock, label: 'History' },
-  { id: 'darkweb', icon: FiDatabase, label: 'Dark Web Monitor' },
   { id: 'geolocation', icon: FiMapPin, label: 'Geolocation' },
+  { id: 'history', icon: FiClock, label: 'History' },
+  { id: 'darkweb', icon: FiDatabase, label: 'Dark Web Monitor' }
 ];
 
 export function Layout({ onLogout }: LayoutProps) {
@@ -101,6 +102,8 @@ export function Layout({ onLogout }: LayoutProps) {
     switch (activeSection) {
       case 'social':
         return <SocialAnalysis />;
+      case 'geolocation':
+        return <GeolocationSection />;
       case 'dashboard':
       default:
         return (

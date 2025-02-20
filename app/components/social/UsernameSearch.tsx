@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiUser, FiGlobe, FiClock, FiAlertCircle, FiUsers } from 'react-icons/fi';
 import type { SocialProfile } from '@/app/lib/types';
 
