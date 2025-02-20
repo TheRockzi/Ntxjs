@@ -28,9 +28,9 @@ export function GeolocationSection() {
   const [error, setError] = useState('');
   const [mapStyle, setMapStyle] = useState('mapbox://styles/mapbox/dark-v11');
   const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
-    // Load saved locations from localStorage
     const saved = localStorage.getItem('savedLocations');
     if (saved) {
       setSavedLocations(JSON.parse(saved));
@@ -47,7 +47,6 @@ export function GeolocationSection() {
         setViewState({ ...viewState, latitude, longitude });
         
         try {
-          // Reverse geocoding using Mapbox API
           const response = await fetch(
             `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
           );
@@ -199,33 +198,40 @@ export function GeolocationSection() {
         {/* Map Container */}
         <div className="lg:col-span-2 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-4
                      hover:border-white/20 transition-all h-[500px]">
-          <Map
-            {...viewState}
-            onMove={evt => setViewState(evt.viewState)}
-            mapStyle={mapStyle}
-            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-            className="w-full h-full rounded-lg"
-          >
-            <NavigationControl />
-            <GeolocateControl />
-            {currentLocation && (
-              <Marker
-                latitude={currentLocation.latitude}
-                longitude={currentLocation.longitude}
-                anchor="bottom"
-              >
-                <div className="relative group">
-                  <FiMapPin className="text-2xl text-[#00e5ff] filter drop-shadow-glow
-                                   transform -translate-y-1/2 group-hover:scale-110 transition-transform" />
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48
-                               bg-black/90 text-white text-sm rounded-lg py-2 px-3 opacity-0
-                               group-hover:opacity-100 transition-opacity">
-                    {currentLocation.address || 'Selected Location'}
-                  </div>
-                </div>
-              </Marker>
-            )}
-          </Map>
+          {process.env.NEXT_PUBLIC_MAPBOX_TOKEN && (
+            <Map
+              {...viewState}
+              onMove={evt => setViewState(evt.viewState)}
+              mapStyle={mapStyle}
+              mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+              onLoad={() => setMapLoaded(true)}
+              className="w-full h-full rounded-lg"
+            >
+              {mapLoaded && (
+                <>
+                  <NavigationControl />
+                  <GeolocateControl />
+                  {currentLocation && (
+                    <Marker
+                      latitude={currentLocation.latitude}
+                      longitude={currentLocation.longitude}
+                      anchor="bottom"
+                    >
+                      <div className="relative group">
+                        <FiMapPin className="text-2xl text-[#00e5ff] filter drop-shadow-glow
+                                         transform -translate-y-1/2 group-hover:scale-110 transition-transform" />
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48
+                                     bg-black/90 text-white text-sm rounded-lg py-2 px-3 opacity-0
+                                     group-hover:opacity-100 transition-opacity">
+                          {currentLocation.address || 'Selected Location'}
+                        </div>
+                      </div>
+                    </Marker>
+                  )}
+                </>
+              )}
+            </Map>
+          )}
         </div>
 
         {/* Info Panel */}

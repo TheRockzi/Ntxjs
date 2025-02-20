@@ -1,4 +1,8 @@
-/* Add these styles to the existing globals.css file */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
 @keyframes glow {
   0%, 100% { 
     filter: drop-shadow(0 0 2px #00e5ff) drop-shadow(0 0 4px #00e5ff);
@@ -35,4 +39,99 @@
   background-color: rgba(0, 0, 0, 0.8) !important;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
+}
+
+/* Custom component styles */
+.stat-card {
+  @apply bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-6
+         hover:border-white/20 transition-all duration-300;
+}
+
+.chart-container {
+  @apply bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-6
+         hover:border-white/20 transition-all duration-300;
+}
+
+.search-input {
+  @apply w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white
+         placeholder:text-gray-500 focus:outline-none focus:border-[#ff0000]/40 transition-all
+         hover:border-white/20;
+}
+
+.sidebar-item {
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-black/20 transition-all
+         w-full text-left;
+}
+
+.scan-button {
+  @apply bg-black/40 backdrop-blur-xl border border-white/10 rounded-lg px-6 py-3
+         hover:bg-black/60 transition-all font-medium text-white
+         flex items-center gap-2;
+}
+
+.new-scan-button {
+  @apply bg-[#ff0000] text-white px-6 py-3 rounded-lg hover:bg-[#ff0000]/90
+         transition-all duration-300 font-medium shadow-lg shadow-[#ff0000]/20
+         border border-[#ff0000]/50 hover:border-[#ff0000];
+}
+
+/* Title glitch effect */
+.title-glitch {
+  position: relative;
+  animation: glitch 1s linear infinite;
+}
+
+@keyframes glitch {
+  2%, 64% {
+    transform: translate(2px, 0) skew(0deg);
+  }
+  4%, 60% {
+    transform: translate(-2px, 0) skew(0deg);
+  }
+  62% {
+    transform: translate(0, 0) skew(5deg);
+  }
+}
+
+.title-glitch:before,
+.title-glitch:after {
+  content: attr(title);
+  position: absolute;
+  left: 0;
+}
+
+.title-glitch:before {
+  animation: glitchTop 1s linear infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+  -webkit-clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+}
+
+@keyframes glitchTop {
+  2%, 64% {
+    transform: translate(2px, -2px);
+  }
+  4%, 60% {
+    transform: translate(-2px, 2px);
+  }
+  62% {
+    transform: translate(13px, -1px) skew(-13deg);
+  }
+}
+
+.title-glitch:after {
+  animation: glitchBottom 1.5s linear infinite;
+  clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+}
+
+@keyframes glitchBottom {
+  2%, 64% {
+    transform: translate(-2px, 0);
+  }
+  4%, 60% {
+    transform: translate(-2px, 0);
+  }
+  62% {
+    transform: translate(-22px, 5px) skew(21deg);
+  }
 }

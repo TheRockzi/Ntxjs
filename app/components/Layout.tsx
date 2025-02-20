@@ -15,7 +15,7 @@ import { ScanConfigModal } from './ScanConfigModal';
 import { ScanProgress } from './ScanProgress';
 import { ScanTerminal } from './ScanTerminal';
 import { SocialAnalysis } from './social/SocialAnalysis';
-import { GeolocationSection } from './GeolocationSection';
+import { GeolocationSection } from './geolocation/GeolocationSection';
 import type { ScanProgress as ScanProgressType } from '../lib/api';
 
 interface LayoutProps {
