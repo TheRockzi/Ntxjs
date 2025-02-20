@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiImage, FiShare2, FiInfo, FiArrowLeft, FiBarChart2 } from 'react-icons/fi';
+import { FiSearch, FiImage, FiShare2, FiInfo, FiArrowLeft } from 'react-icons/fi';
 import { UsernameSearch } from './UsernameSearch';
 import { ImageAnalysis } from './ImageAnalysis';
 import { DataCorrelation } from './DataCorrelation';
 import { LegalDisclaimer } from './LegalDisclaimer';
-import { AnalyticsGrid } from './AnalyticsGrid';
 
 type AnalysisTab = 'username' | 'image' | 'correlation' | 'legal' | null;
 
@@ -15,44 +14,34 @@ const analysisOptions = [
     label: 'Username Search',
     icon: FiSearch,
     description: 'Search and analyze usernames across multiple platforms',
-    color: '#ff0000'
+    color: '#ff0000',
+    gradient: 'from-[#ff0000]/20 to-transparent'
   },
   {
     id: 'image',
     label: 'Image Analysis',
     icon: FiImage,
     description: 'Analyze images for metadata and perform reverse searches',
-    color: '#00e5ff'
+    color: '#00e5ff',
+    gradient: 'from-[#00e5ff]/20 to-transparent'
   },
   {
     id: 'correlation',
     label: 'Data Correlation',
     icon: FiShare2,
     description: 'Correlate data across different sources and timelines',
-    color: '#bc13fe'
+    color: '#bc13fe',
+    gradient: 'from-[#bc13fe]/20 to-transparent'
   },
   {
     id: 'legal',
     label: 'Legal Guidelines',
     icon: FiInfo,
     description: 'Important legal and ethical considerations',
-    color: '#00ff41'
+    color: '#00ff41',
+    gradient: 'from-[#00ff41]/20 to-transparent'
   }
 ];
-
-// Mock analytics data
-const mockAnalytics = {
-  profiles: 847,
-  activity: 92,
-  reach: 156432,
-  risks: 12,
-  trends: {
-    profiles: 15,
-    activity: 8,
-    reach: 23,
-    risks: -5
-  }
-};
 
 export function SocialAnalysis() {
   const [activeTab, setActiveTab] = useState<AnalysisTab>(null);
@@ -72,23 +61,14 @@ export function SocialAnalysis() {
             className="space-y-8"
           >
             <div className="text-center mb-12">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent mb-4">
+              <h1 className="text-4xl font-bold text-white mb-4">
                 Social Analysis Tools
               </h1>
-              <p className="text-gray-400">Select an analysis tool to begin your investigation</p>
-            </div>
-
-            {/* Analytics Overview */}
-            <div className="mb-12">
-              <div className="flex items-center gap-2 mb-6">
-                <FiBarChart2 className="text-[#00e5ff] text-xl" />
-                <h2 className="text-xl font-semibold text-white">Analytics Overview</h2>
-              </div>
-              <AnalyticsGrid data={mockAnalytics} />
+              <p className="text-lg text-gray-200">Select an analysis tool to begin your investigation</p>
             </div>
 
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto"
+              className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto"
               variants={{
                 show: {
                   transition: {
@@ -119,30 +99,71 @@ export function SocialAnalysis() {
                     }
                   }}
                   whileHover={{ 
-                    scale: 1.05,
-                    boxShadow: `0 0 20px ${option.color}40`
+                    scale: 1.02,
+                    y: -5
                   }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleCardClick(option.id as AnalysisTab)}
-                  className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 cursor-pointer
-                           hover:border-white/20 transition-all duration-300"
-                  style={{
-                    boxShadow: `0 0 10px ${option.color}20`
-                  }}
+                  className="relative group cursor-pointer"
                 >
-                  <div className="flex items-start gap-4">
+                  {/* Background Gradient Effect */}
+                  <div 
+                    className={`absolute inset-0 bg-gradient-to-br ${option.gradient} opacity-0 
+                               group-hover:opacity-100 transition-opacity duration-500 rounded-2xl blur-xl`}
+                  />
+
+                  {/* Card Content */}
+                  <div className="relative bg-[#0a0a0a]/90 backdrop-blur-md border border-white/10 rounded-2xl p-8
+                                hover:border-white/20 transition-all duration-500 overflow-hidden
+                                shadow-lg hover:shadow-xl hover:shadow-black/30">
+                    {/* Decorative Elements */}
                     <div 
-                      className="p-3 rounded-lg"
+                      className="absolute top-0 right-0 w-32 h-32 opacity-10 transform translate-x-16 -translate-y-16 rounded-full"
+                      style={{ background: `radial-gradient(circle, ${option.color}, transparent 70%)` }}
+                    />
+                    <div 
+                      className="absolute bottom-0 left-0 w-24 h-24 opacity-10 transform -translate-x-12 translate-y-12 rounded-full"
+                      style={{ background: `radial-gradient(circle, ${option.color}, transparent 70%)` }}
+                    />
+
+                    {/* Icon */}
+                    <div 
+                      className="relative inline-flex p-4 rounded-xl mb-6 transition-transform duration-500
+                                group-hover:scale-110 group-hover:rotate-3"
                       style={{ backgroundColor: `${option.color}20` }}
                     >
                       <option.icon 
-                        className="text-2xl"
+                        className="text-3xl transition-transform duration-500 group-hover:scale-110"
                         style={{ color: option.color }}
                       />
+                      <div 
+                        className="absolute inset-0 rounded-xl opacity-50 blur-md transition-opacity duration-500
+                                 group-hover:opacity-100"
+                        style={{ backgroundColor: `${option.color}10` }}
+                      />
                     </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-white mb-2">{option.label}</h3>
-                      <p className="text-gray-400">{option.description}</p>
+
+                    {/* Content */}
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-bold text-white tracking-wide
+                                   transition-all duration-500"
+                      >
+                        {option.label}
+                      </h3>
+                      <p className="text-base text-gray-200 font-medium leading-relaxed">
+                        {option.description}
+                      </p>
+                    </div>
+
+                    {/* Hover Indicator */}
+                    <div className="absolute bottom-4 right-4 opacity-0 transform translate-y-2
+                                  group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
+                      <div 
+                        className="text-sm font-bold tracking-wide"
+                        style={{ color: option.color }}
+                      >
+                        Click to Start →
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -158,17 +179,17 @@ export function SocialAnalysis() {
             <div className="mb-8 flex items-center gap-4">
               <button
                 onClick={() => setActiveTab(null)}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                className="flex items-center gap-2 text-white hover:text-gray-200 transition-colors font-medium"
               >
                 <FiArrowLeft />
                 <span>Back to Tools</span>
               </button>
-              <h2 className="text-2xl font-semibold bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
+              <h2 className="text-2xl font-bold text-white">
                 {analysisOptions.find(opt => opt.id === activeTab)?.label}
               </h2>
             </div>
 
-            <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6">
+            <div className="bg-[#0a0a0a]/90 backdrop-blur-md border border-white/10 rounded-xl p-6">
               {activeTab === 'username' && <UsernameSearch />}
               {activeTab === 'image' && <ImageAnalysis />}
               {activeTab === 'correlation' && <DataCorrelation />}
